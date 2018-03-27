@@ -10,7 +10,7 @@ import ChevronRight from './chevron_right.js'
 export default class Carousel extends Component {
   static propTypes = {
     showIndicators: PropTypes.bool,
-    infiniteLoop: PropTypes.bool,
+    infinite: PropTypes.bool,
     legendClassName: PropTypes.string,
     wrapperClassName: PropTypes.string,
     cssEase: PropTypes.string,
@@ -37,7 +37,6 @@ export default class Carousel extends Component {
     showIndicators: true,
     infinite: true,
     showArrows: true,
-    infiniteLoop: true,
     legendClassName: null,
     wrapperClassName: null,
     cssEase: 'ease',
@@ -93,6 +92,10 @@ export default class Carousel extends Component {
     if (autoPlay) {
       this.setupAutoPlay()
     }
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.setState({ initialized: false })
   }
 
   componentDidUpdate() {
@@ -262,8 +265,8 @@ export default class Carousel extends Component {
     const recalc =
       currentPosition < 0 || currentPosition >= carouselItems.length
 
-    window.clearTimeout()
-    window.setTimeout(() => {
+    window.clearTimeout(this.recalculateTimer)
+    this.recalculateTimer = window.setTimeout(() => {
       recalc ? this.calculateSliderPos() : this.onSlideChange()
     }, this.props.transitionDuration)
   }
@@ -287,7 +290,7 @@ export default class Carousel extends Component {
   }
 
   onSlideChange = () => {
-    this.props.onCarouselChange(this.state.selectedItem)
+    this.props.onCarouselChange(this.state.currentPosition)
     this.setState({ ...this.state, disabled: false })
   }
 
@@ -372,7 +375,7 @@ export default class Carousel extends Component {
 
     const className = [
       styles['carousel-item'],
-      cloned && this.props.infinite === false
+      cloned && !this.props.infinite
         ? styles['carousel-item--cloned']
         : '',
     ].join(' ')
@@ -521,10 +524,11 @@ export default class Carousel extends Component {
   }
 
   render() {
-    const { showArrows, showIndicators, height } = this.props
-    const { carouselItems, cssAnimation, clones, translate3d } = this.state
+    const { showArrows, showIndicators, height, infinite } = this.props
+    const { carouselItems, cssAnimation, clones, translate3d, currentPosition } = this.state
 
     const items = clones || carouselItems
+    const lastPosition = items.length - 3
 
     let sliderStyle
     if (this.props.animationType === 'fade') {
@@ -559,8 +563,10 @@ export default class Carousel extends Component {
             </ul>
           </div>
         </div>
-        {showArrows && this.renderArrows('previous')}
-        {showArrows && this.renderArrows('next')}
+        {(showArrows && (!infinite? currentPosition !== 0: true)) &&
+          this.renderArrows('previous')}
+        {(showArrows && (!infinite? currentPosition !== lastPosition: true)) &&
+          this.renderArrows('next')}
         {showIndicators && this.renderIndicators()}
       </div>
     )
