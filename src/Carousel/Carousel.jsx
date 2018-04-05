@@ -31,6 +31,7 @@ export default class Carousel extends Component {
     imagesLoaded: PropTypes.func,
     indicatorUlStyles: PropTypes.shape(),
     indicatorLiStyles: PropTypes.shape(),
+    arrowStyles: PropTypes.shape(),
   }
 
   static defaultProps = {
@@ -50,6 +51,7 @@ export default class Carousel extends Component {
     redirectCallback: null,
     indicatorLiStyles: {},
     indicatorUlStyles: {},
+    arrowStyles: {},
     onCarouselChange: () => {},
     onCarouselMouseEnter: () => {},
     onCarouselMouseLeave: () => {},
@@ -511,7 +513,7 @@ export default class Carousel extends Component {
         type="button"
         className={[styles['arrow'], styles[`arrow--${action}`]].join(' ')}
         onClick={isPrev ? this.decrement : this.increment}
-        style={style.button}
+        style={Object.assign({}, style.button, this.props.arrowStyles)}
         disabled={this.state.disabled}
         onMouseEnter={e => this.onArrowMouseEnter(e, action)}
         onMouseLeave={e => this.onArrowMouseLeave(e, action)}
